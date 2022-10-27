@@ -1,0 +1,404 @@
+- Select \* asterisk is similar to saying select all columns from a given table name.
+
+- Using the Asterisk is called using the wild card and it's considered to be a back practice when there is a large volume of stored data.
+
+SELECT \* FROM tableName
+
+---
+
+It's better to use the Explicit Notation - for querying specific columns of interest as it improves readability, and makes the code easier to troubleshoot.
+
+---
+
+If you want to reference a specific column of a table with a better-friendly name, you can use the word AS, e.g.
+
+SELECT first_name_12_pql AS first_name
+FROM full_person_data AS person
+
+---
+
+Use Distinct Values
+
+We use the keyword distinct when we have records with possible duplication of names, terms etc, so that we only want to return the given value one time, so we only see the unique values that exist in the column.
+
+Let's say we want to return the first_name field of students from a student's table without duplications.
+
+SELECT DISTINCT first_name FROM students;
+
+Another example is:
+
+SELECT DISTINCT mkt_carrier,  
+ origin as depart_city
+FROM performance;
+
+---
+
+Introducing the WHERE keyword:
+
+To specify criteria to limit the records returned by our query, we can use the WHERE keyword.
+
+e.g. we only want to see the first_name and the last_name from a certain table WHERE a person has the first name "Shelby".
+
+SELECT first_name, last_name
+FROM person
+WHERE first_name = "Shelby";
+
+Note:
+
+- The WHERE criteria is case-sensitive.
+
+---
+
+Comparison Operators:
+
+= equal
+<> not equal
+Note: these can be applied to all data types.
+
+> greater than
+> < less than
+> = greater than
+> <= less than
+
+Note: the upper four operators are generally used on numeric, integer, and date values.
+
+These are called Comparison Operators because they tell PostgreSQL to compare the specified field against a specified value.
+
+Multiple criteria can be combined using the keyword AND.
+
+e.g. Population Table
+
+SELECT city, state, population
+FROM city_population
+WHERE city = "Brisbane"
+AND state = "Qld";
+
+---
+
+Relational Operators vs LIKE logical operator:
+
+- Relational operators match fields to a specific value.
+
+- LIKE matches fields to specific pattern
+
+e.g. LIKE
+
+- Without the LIKE keyword:
+
+SELECT first_name, last_name
+FROM person
+WHERE first_name = "Shelby";
+
+- With the LIKE keyword:
+
+SELECT first_name, last_name
+FROM person
+WHERE first_name LIKE "Shelby";
+
+USING WILD CARDS
+
+We could also use the Wild cards characters to give us flexibility when choosing our criteria and there are two of them:
+
+- % which represents more characters
+- the underscore sign \_ which represents One character.
+
+e.g. LIKE + Wildcards
+
+SELECT first_name, last_name
+FROM person
+WHERE first_name LIKE "Shelby%";
+
+This tells PostgreSQL, that we are interested in any student with a first_name that starts with "Shelby" regardless of the additional number of characters that follow.
+
+- if we put % at the beginning of our criteria to indicate that we are interested only in results that ends with Shelby e.g. James Shelby - and regardless of the number
+  of characters proceeded.
+
+WHERE first_name LIKE "%Shelby";
+
+- we could also write it as below to return records that starts with "She" at any number of characters in the middle, and ends with "lby"
+
+WHERE first_name LIKE "She%lby";
+
+- if we use the underscore sign _ each _ represents only one character e.g. we only want the first_name that contains 3 characters and ends with "lby" :
+
+WHERE first_name LIKE
+
+---
+
+dealing with messy data sets, we could use:
+
+- Fuzzy-matching
+- Regular expressions
+
+These are more advanced topics -
+
+---
+
+PostgreSQL contains two criteria statements specifically dealing with Null values
+
+- in database, Null is not equal to Zero
+- Null indicates that the value of a field is missing or unknown
+- A field is Null, when no data exists in that field
+
+keywords for Null values
+
+1. Is Null => Field = " "
+2. Is not Null => Field <> " "
+
+Note:
+
+- You can't use standard relational operators to find Null values
+- Must use IS NULL or IS NOT NULL syntax
+
+To check for NOT NULL records:
+
+SELECT first_name
+FROM person
+WHERE first_name IS NOT NULL
+
+To check for NULL records
+
+SELECT first_name
+FROM person
+WHERE first_name IS NULL
+
+Note: check for NULL values to diagnose issues in a dataset
+
+---
+
+Logical Operator AND & OR
+
+AND => all conditions must be true
+OR => if one of the condition is applied = true
+BETWEEN => looks for matches within specific and inclusive boundaries
+IN => replaces multiple OR statements and check of equality conditions
+NOT IN => used to return a value that do not match any of the listed values
+
+SELECT first_name
+age
+FROM person
+WHERE age >= 19
+AND age <= 35;
+
+- now we use BETWEEN
+
+SELECT first_name
+age
+FROM person
+WHERE age BETWEEN 19 AND 35;
+
+- We use IN to search for multiple values in fields
+
+SELECT first_name
+age
+FROM person
+WHERE first_name IN
+("John, Sammy, Elmo")
+
+---
+
+Operator precedence
+=> is the sequence in which operations are performed in our query.
+by default:
+
+1. AND has higher operator precedence than OR - meaning AND will be evaluated first regardless of where you put them
+2. use ( ) when writing more complex expressions to avoid any confusion that may arrive from the order of precedence
+
+SELECT first_name
+last_name
+hometown
+FROM person
+WHERE (first_name = "Shelby"
+OR first_name = "Tom")
+AND hometown = "Boston";
+
+---
+
+Combining data from multiple tables - using joins
+
+1- when we join tables using SQL, we combine them based on common information that or shared btw the tables
+2- Data keys - two types:
+
+- primary keys => column or set of column with no duplicate values across the rows - it uniquely identifies each record in the table
+- foreign keys => a set of one or more columns in a table that refers to/points to a primary key (data) in another table
+
+There are 3 types of joins:
+
+1. inner joins
+2. outer joins
+3. full joins
+
+1- inner joins:
+
+a. return all rows from two or more tables that meet the join condition
+b. joined fields must exist in both of the tables being joined
+c. if you write JOIN, PostgreSQL will default it to INNER JOIN
+d. to use ON, you mush have a matching JOIN keyword
+
+- INNER JOIN query example
+
+SELECT customers.asterisk, // the asterisk sign tell SQl that we want all the columns from the customers table
+orders.asterisk // we want all the columns from the orders table
+FROM customers
+INNER JOIN orders // tells PostgreSQL the type of JOIN we are interested in (INNER JOIN), and we specify the table we want to join to (orders)
+ON customers.customer.id = orders.customer_id; // here, we are specifying what fields are we interested in (customer.id) and from which table (customers. , orders.)
+
+Note:
+
+1. it's better to specify your INNER JOIN keywords and
+2. explicitly list the ON criteria
+3. in the above example customer.id is a primary key to customers table - but a foreign key to the orders table
+4. the use of asterisk sign as a Wildcard is generally not the best practice and is not recommended as it may show duplicate records or waive other records
+5. use the WHERE keyword to specify a specific field of interest
+
+To rewrite our query in a better specific way, we could:
+
+SELECT customers.first_name,
+customers.last_name,
+orders.order_date,
+orders.order_amount
+FROM customers
+INNER JOIN orders
+ON customers.customer.id = orders.customer.id;
+WHERE customers.last_name = "Dodd"
+
+2. outer joins
+
+- left join => returns all record from the left table along with any matching records from the right table
+- right join => returns all record from the right table along with any matching records from the left table
+
+Outer joins notes:
+
+- writing LEFT JOIN equals writing LEFT OUTER JOIN
+- writing RIGHT JOIN equals writing RIGHT OUTER JOIN
+- LEFT OUTER JOIN is more prevalent in practice than the Right one as it can be easy read and interpreted
+
+e.g. Left outer join
+
+SELECT c.first_name,
+c.last_name,
+o.order_date,
+o.order_amount
+FROM customers c
+LEFT OUTER JOIN orders o // Read as customers on left, then JOIN on orders
+ON c.customer_id = o.customer_id;
+
+e.g. Right outer join
+
+SELECT c.first_name,
+c.last_name,
+o.order_date,
+o.order_amount
+FROM customers c
+RIGHT OUTER JOIN orders o // Read as orders on right, then JOIN customers
+ON c.customer_id = o.customer_id;
+
+---
+
+Table Alias
+
+- temporary table in query e.g. when we write; user_first_name AS first_name
+
+we could alias tables e.g. customers AS c - orders AS o
+
+SELECT c.first_name,
+c.last_name,
+o.order_date,
+o.order_amount
+FROM customers AS c
+INNER JOIN orders AS o
+ON c.customer.id = o.customer.id;
+WHERE c.last_name = "Dodd"
+
+---
+
+FULL JOIN
+
+- returns all records from two or more tables regardless of whether the join condition is met
+- if no match, the missing side will contain null
+
+e.g. Full outer join
+
+SELECT c.first_name,
+c.last_name,
+o.order_date,
+o.order_amount
+FROM customers c
+FULL OUTER JOIN orders o
+ON c.customer_id = o.customer_id;
+
+---
+
+Lookup tables or Validation tables
+
+- are DB tables that contain data that specify the values for given codes
+
+---
+
+Presenting and Aggregating the results
+
+- when we query some data, the returned data will be in the same stored order
+- we can sort the data order by using the ORDER BY keyword
+- if the sorting order is specified, ascending order is the default order
+
+- ascending order is written; SORT BY ASC
+- descending order is written; SORT BY DESC
+
+e.g. sample data query with ORDER BY:
+
+SELECT name,
+state
+FROM residency
+ORDER BY name, state
+
+or using different orders for different columns
+
+SELECT name,
+state
+FROM residency
+ORDER BY state DESC, name ASC
+
+---
+
+Aggregate Functions
+
+functions that perform calculations across the set of values to return a single value.
+
+count = count rows in specified tables or views
+sum = calculate the sum of a given values
+AVG = calculate the average of a given values
+min = finds the minimum value in a set of values
+max = finds the maximum value
+
+We can use GROUP BY to choose a specific field to be the first column in the query.
+
+e.g. GROUP BY grade level = grade_lvl
+NOTE
+
+- Make sure all non-aggregate fields are listed in the GROUP BY clause e.g. the grade_lvl must be listed in the GROUP BY clause
+- AVG is an aggregate field - you don't need to list it in the GROUP BY clause
+
+SELECT grade_lvl
+AVG(age)
+FROM person
+GROUP BY grade_lvl;
+
+---
+
+filtering Aggregate results
+
+- HAVING always follows GROUP BY
+
+HAVING vs WHERE
+WHERE = filter single rows
+HAVING = filter aggregate rows
+
+---
+
+Summary:
+
+1. ORDER BY = allow us to present our results sorted in a way that may be useful to you as an analyst
+2. Aggregate functions = perform calculations on entire datasets or on groups of data using the GROUP BY keyword
+3. If you perform analyses on groups of data, you can filter the aggregate by using HAVING keyword
+
+- with these tools you can use SQL to perform more complex analysis
